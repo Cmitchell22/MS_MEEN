@@ -45,14 +45,6 @@ if m == alpha
     m = alpha + 1;
 end
 
-%% Initial Condition, g term 
-
-
-     %%initial condition term
-     for k = 0:m
-        g = g + Take_Deriv(fdefun,k)*(t)^(k)/factorial(k) %***************
-     end
-
 %% ************************************************************
 
 %Logic for initialization. the first prediction will be y(1/4), then y(1/2), then y(1), and all further steps are 1.
@@ -66,17 +58,16 @@ for t_step = 1:4 %(steps required for startup sequence
      
 %% ************************* Startup Algorithm *************************
 
+    g = calculate_IC(fdefun, alpha, startup_time(t_step+1))
+
 
 %StartUp
 if t_step == 1
     %Approximate y(1/4):
     
     %Compute Interpolation B coefficients
-    t_a = startup_time(1); 
-    t_b = startup_time(t_step +1);
-    t_c = t_a;
-    t_d = t_b;
-    [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+    t_nn = t_jj;
+    [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_j, t_jj, t_nn, alpha)
     
     %Predict: y_predictor(1/4): constant interpolation
     y_predictor(t_step + 1) = g + 1/(gamma(alpha+1))*(h/4)^alpha * f_corrector(t_step);
@@ -90,9 +81,8 @@ elseif t_step == 2
     %Calculate Interpolation A & B coefficients for lag term
     t_a = startup_time(t_step-1);
     t_b = startup_time(t_step);
-    t_c = t_a;
-    t_d = t_b;
-    [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+    t_nn = startup_time(t_step + 1);
+    [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_a, t_b, t_nn, alpha);
     
     %Lag Term: y_lag(1/2):
     f_corrector(t_step) = Take_Caputo_Deriv(y_corrector(t_step), alpha, m)
@@ -103,11 +93,8 @@ elseif t_step == 2
     y_predictor_const(t_step + 1) = g + y_lag(t_step + 1) + 1/(gamma(alpha+1))*(h/4)^alpha * f_corrector(t_step)
     
       %Redefine Interpolation Values for Linear Interp Predictor
-      t_a = startup_time(t_step);
-      t_b = startup_time(t_step + 1);
-      t_c = t_a;
-      t_d = t_b;
-      [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+      t_nn = t_jj;
+      [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_j,t_jj, t_nn, alpha);
     
     %Predict: y_predictor(1/2): linear interpolation
     f_predictor_const(t_step + 1) = Take_Caputo_Deriv( y_predictor_const(t_step + 1), alpha, m)
@@ -119,7 +106,8 @@ elseif t_step == 2
       t_c = t_a;
       t_d = startup_time(t_step);
       t_e = t_b;
-      [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = Quadratic_Interp(t_a,t_b,t_c,t_d,t_e,t_jj,alpha);
+      t_nn = t_jj;
+      [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = A_Coefficients(t_a,t_b,t_c,t_d,t_e,t_nn,alpha);
     
     %Correct y_corrector(1/2): quadratic interpolation
     f_predictor_lin(t_step + 1) = Take_Caputo_Deriv( y_predictor_P1(t_step + 1), alpha, m)
@@ -133,9 +121,8 @@ elseif t_step == 3
     %Calculate Interpolation B coefficients for lag term
     t_a = startup_time(1);
     t_b = startup_time(t_step);
-    t_c = t_a;
-    t_d = t_b;
-    [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+    t_nn = t_jj;
+    [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_a,t_b, t_nn, alpha);
     
     f_corrector(t_step) = Take_Caputo_Deriv(y_corrector(t_step), alpha, m)
 
@@ -144,11 +131,8 @@ elseif t_step == 3
     y_predictor_P1(t_step + 1) = g + y_lag(t_step + 1) + 1/(gamma(alpha+1))*(h/2)^alpha * f_corrector(t_step)
     
     %Redefine Interpolation Values for Linear Interp Predictor
-      t_a = startup_time(t_step);
-      t_b = startup_time(t_step + 1);
-      t_c = t_a;
-      t_d = t_b;
-      [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+      t_nn = t_jj;
+      [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_j, t_jj, t_nn, alpha);
     
     %Predict: y_predictor(1) linear interp
     f_predictor_P1(t_step + 1) = Take_Caputo_Deriv(y_predictor_P1(t_step + 1), alpha, m)
@@ -161,7 +145,7 @@ elseif t_step == 3
       t_c = t_a;
       t_d = startup_time(t_step);
       t_e = t_b;
-      [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = Quadratic_Interp(t_a,t_b,t_c,t_d,t_e,t_jj,alpha);
+      [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = A_Coefficients(t_a,t_b,t_c,t_d,t_e,t_jj,alpha);
     
       
     f_predictor_P2(t_step + 1) = Take_Caputo_Deriv(y_predictor_P2(t_step + 1), alpha, m)
@@ -180,7 +164,8 @@ elseif t_step == 4
     t_c = t_a;
     t_d = startup_time(t_step - 1);
     t_e = t_b;
-    [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = Quadratic_Interp(t_a,t_b,t_c,t_d,t_e,t_jj,alpha);
+    t_nn = t_jj;
+    [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = A_Coefficients(t_a,t_b,t_c,t_d,t_e,t_nn,alpha);
     
     f_corrector(t_step) = Take_Caputo_Deriv(y_corrector(t_step), alpha, m)
  
@@ -190,11 +175,8 @@ elseif t_step == 4
     y_predictor_P1(t_step + 1) = g + y_lag(t_step + 1) + 1/(gamma(alpha+1))*h^alpha * f_corrector(t_step)
     
     %Redefine Interpolation Values for Linear Interp Predictor
-      t_a = startup_time(t_step);
-      t_b = startup_time(t_step + 1);
-      t_c = t_a;
-      t_d = t_b;
-      [B_0n_Coeff, B_1n_Coeff] = Linear_Interp(t_a,t_b,t_c,t_d,t_jj,alpha);
+       t_nn = t_jj;
+      [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(t_j,t_jj, t_nn, alpha);
     
       
     f_predictor_P1(t_step+1) = Take_Caputo_Deriv(y_predictor_P1(t_step+1), alpha, m)
@@ -209,7 +191,8 @@ elseif t_step == 4
       t_c = startup_time(1);
       t_d = t_a;
       t_e = t_b;
-     [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = Quadratic_Interp(t_a,t_b,t_c,t_d,t_e,t_jj,alpha);
+      t_nn = t_jj;
+     [A_0n_Coeff, A_1n_Coeff, A_2n_Coeff] = A_Coefficients(t_a,t_b,t_c,t_d,t_e,t_nn,alpha);
     
     f_predictor_P2(t_step+1) = Take_Caputo_Deriv(y_predictor_P2(t_step+1), alpha, m)
  
