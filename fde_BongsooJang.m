@@ -1,6 +1,6 @@
 %function [t, y] = fde_BongsooJang(alpha, fdefun, t0, t_final, y0, h)
 %Insert Help Description Here
-
+% LAST UPDATED: October 27, 2017
 clc; clear all; close all;
 syms 't';
 alpha = 0.5;
