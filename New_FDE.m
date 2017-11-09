@@ -57,7 +57,7 @@ for n = 0:h:h
     %Now we are able to calculate the predictor:
     
     % Take Caputo Derivatives of the y_corrector term at current step
-    f_corrector(jj) = Take_Caputo_Deriv(y_corrector(jj), alpha, m)
+    f_corrector(jj) = Take_Caputo_Deriv(y_corrector(jj),n, alpha, m)
     
     % Predictor term at the new step (Need to have n-1 term. First pass: n = 0, n+1 = n+h, n-1 is not bound.)
     if jj > 1
@@ -66,7 +66,7 @@ for n = 0:h:h
         y_predictor(jj+1) = g(jj+1) + y_lag_final(jj+1) + h^alpha/gamma(alpha+2)*(b0*0 + b1*f_corrector(jj))
     end
     % take Caputo Derivative of the predictor
-    f_predictor(jj+1) = Take_Caputo_Deriv(y_predictor(jj+1), alpha, m)
+    f_predictor(jj+1) = Take_Caputo_Deriv(y_predictor(jj+1), n+h, alpha, m)
     
     %Calculate Coefficients for
     [B_0n_Coeff, B_1n_Coeff] = B_Coefficients(n,n+h, n+h, alpha)
@@ -77,7 +77,7 @@ for n = 0:h:h
     %Corrector term at the new step
     y_corrector(jj+1) = g(jj+1) + y_lag_final(jj+1) + y_increment(jj+1)
     
-    f_corrector(jj+1) = Take_Caputo_Deriv(y_corrector(jj+1), alpha, m)
+    f_corrector(jj+1) = Take_Caputo_Deriv(y_corrector(jj+1),n+h, alpha, m)
     
     jj = jj + 1
      
