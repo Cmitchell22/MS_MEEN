@@ -1,10 +1,10 @@
-function g = calculate_IC(fdefun, alpha, t_eval)
-
-m = round(alpha, 0);
+function g_equation = calculate_IC(funct, alpha)
+syms t
+m = 1
 g_sum = 0;
 
 for k = 0:m
-    g_sum = g_sum + Take_Deriv(fdefun,k)*(t_eval)^(k)/factorial(k); %***************
+    g_sum = g_sum + Take_Deriv(funct,k)*(t)^(k)/factorial(k) %***************
 end
 
-g = subs(g_sum, t_eval);
+g_equation = 1;
