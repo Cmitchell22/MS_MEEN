@@ -128,7 +128,7 @@ y_corrector(jj+1) = g(jj+1) + y_lag(jj+1) + 1/gamma(alpha)*(A_0n_Coeff*f_correct
 f_corrector(jj+1) = feval(fdefun, 2*h, y_corrector(jj+1));
 
 % Linear vs Quadratic Startup:
-if strcmp(scheme, 'linear') == true
+if strcmp(scheme, 'linear') == true || strcmp(scheme, 'ABM') == true
     startup_export = [f_corrector(jj), f_corrector(jj+1), y_corrector(jj), y_corrector(jj+1)];
 elseif strcmp(scheme, 'quadratic') == true
     startup_export = [f_corrector(jj-1), f_corrector(jj), f_corrector(jj+1), y_corrector(jj-1),  y_corrector(jj), y_corrector(jj+1)];

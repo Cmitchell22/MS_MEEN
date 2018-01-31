@@ -4,7 +4,6 @@ clear all;
 close all;
 %% Initialization of Variables, and I.C.'s
 alpha  = 0.25; 
-scheme = 'ABM'
 % y_term = t^(4+alpha)
 % fdefun = gamma(5+alpha)/24*t^4 + t^(8+2*alpha) - y_term^2
 % y_term = t^8 - 3*t^(4+alpha/2)+9/4*t^alpha;
@@ -16,15 +15,16 @@ t0 = 0;
 tfinal = 1;
 y0 = 0;
 startup_export = StartupProcedure(fdefun, scheme, t0, y0, alpha, h);
-f_corrector(1) = feval(fdefun, t0, y0(1)); % f(0)
-f_corrector(2) = startup_export(1); %f(h)
-f_corrector(3) = startup_export(2); %f(2h)
+f_corrector(1) = feval(fdefun, t0, y0(1));
+f_corrector(2) = startup_export(1);
+f_corrector(3) = startup_export(2);
 
 y_corrector(1) = y0(1);
 y_corrector(2) = startup_export(3);
 y_corrector(3) = startup_export(4);
 
-jj = 3;
+ii = 1;
+jj = 1;
 
 %Calculate Initial Condition
 g_equation = 0; %calculate_IC(y_term, alpha)
@@ -39,7 +39,7 @@ g_equation = 0; %calculate_IC(y_term, alpha)
 
 %% ABM Method
 % n is the current time step. Starts at zero, and increases by h each time.
-for n = (2*h + t0):h:2*h
+for n = t0:h:1
     
     g(jj+1) = 0;
     
@@ -93,8 +93,7 @@ for n = (2*h + t0):h:2*h
 end
 
 i = 1;
-time = t0:h:tfinal;
-for t = t0:h:tfinal
+for t = 0:0.05:1
     true_solution(i) = t^8 - 3*t^(4+alpha/2)+9/4*t^alpha;
     i = i +1;
 end

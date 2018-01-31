@@ -2,7 +2,7 @@
 clc;
 clear all;
 close all;
-alpha = 1.25;
+alpha = 0.5;
 y0 = [0,0];
 t0 = 0;
 tfinal = 1;
@@ -25,5 +25,6 @@ plot(time, Y_quad)
 hold on
 plot(time, Y_ABM)
 legend('True', 'Linear', 'Quadratic', 'ABM')
-savename = strcat('Eq1_alpha=',num2str(alpha),'_N=',num2str(1/h),'.png');
-saveas(gcf, savename)
+% ACTIVATE SAVING FIGURE
+% savename = strcat('Eq1_alpha=',num2str(alpha),'_N=',num2str(1/h),'.png');
+% saveas(gcf, savename)

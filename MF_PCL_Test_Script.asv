@@ -4,10 +4,10 @@ close all;
 %New FDE function test script
 
 %% Data Collection Toggles:
-write_to_excel = 1;
-error_analysis = 1;
+write_to_excel = 0;
+error_analysis = 0;
 generate_plots = 1;
-save_plots = 1;
+save_plots = 0;
 
 start_time = cputime;
 %% Input Variables
@@ -17,7 +17,7 @@ tfinal = 1;
 h_largest = 0.1;
 h_list = [h_largest, h_largest/2, h_largest/4, h_largest/8, h_largest/16, h_largest/32, h_largest/64];
 Num_Sims = length(h_list);
-alpha =1.25;
+alpha =0.25;
 %**************************************************************************
 % EQUATION BANK
 %**************************************************************************
@@ -38,7 +38,7 @@ alpha =1.25;
 
 %**************************************************************************
 for AA = 1:Num_Sims
-    h = h_list(AA);
+    h = h_list(AA)
     
     %% RUN MF_PCL
     [T,Y_MF_PCL] = MF_PCL(fdefun,t0,tfinal,y0,alpha, h);
@@ -46,7 +46,7 @@ for AA = 1:Num_Sims
     %% Get True Solution
     i = 1;
     for t = t0:h:tfinal
-        true_solution(i) = t^8 - 3*t^(4+alpha/2)+9/4*t^alpha; %Change depending on Eq being used!
+        true_solution(i) = t^(4+alpha); %Change depending on Eq being used!
         i = i +1;
     end
     
@@ -94,19 +94,19 @@ for AA = 1:Num_Sims
         end
         EL2_ABM = (h*E2_sum_ABM)^(0.5);
         EL2_MF_PCL = (h*E2_sum_MF_PCL)^(0.5);
-        EL2_MF_PCQ = (h*E2_sum_MF_PCQ)^(0.5);
+        EL2_MF_PCQ = (h*E2_sum_MF_PCQ)^(0.5)
         EPT_ABM = abs(Error_ABM(length(T)));
         EPT_MF_PCL = abs(Error_MF_PCL(length(T)));
         EPT_MF_PCQ = abs(Error_MF_PCQ(length(T)));
-        figure(Num_Sims+1)
-        plot(h,EL2_ABM, 'g*')
+        figure(2)
+        plot(h,EL2_ABM)
         hold on 
-        plot(h,EL2_MF_PCL, 'r*')
+        plot(h,EL2_MF_PCL)
         hold on
-        plot(h,EL2_MF_PCQ, 'b*')
-        legend('ABM', 'MF-PCL', 'MF-PCQ')
+        plot(h,EL2_MF_PCQ
+        legend('ABM', 'MF_PCL', 'MF_PCQ')
         if save_plots == 1
-            savename = strcat('Error_Analysis_Eq1_alpha=',num2str(alpha),'.png');
+            savename = strcat('Error_Analysis_Eq1_alpha=',num2str(alpha),'_N=',num2str(1/h),'.png');
             saveas(gcf, savename)
         end
     end
@@ -114,12 +114,27 @@ for AA = 1:Num_Sims
     %% Write to Excel Spreadsheet:
     if write_to_excel == 1 && error_analysis == 1
         export_info = {'N', 'EPT_ABM', 'EL2_ABM' , 'EPT_MF_PCL', 'EL2_MF_PCL', 'EPT_MF_PCQ', 'EL2_MF_PCQ';
-                       1/h,   EPT_ABM,    EL2_ABM,   EPT_MF_PCL,   EL2_MF_PCL,   EPT_MF_PCQ,  EL2_MF_PCQ};  
-ROW = 3*21+ AA*3-2;
+                       1/h,   EPT_ABM,    EL2_ABM,   EPT_MF_PCL,   EL2_MF_PCL, EPT_MF_PCQ, EL2_MF_PCQ};  
 
-        filename = 'ErrorAnalysisNew.xlsx';
-        writetocell = strcat('A',num2str(ROW));
-        xlswrite(filename, export_info, 'Equation_1',  writetocell);  
+        BB = AA*8 - 7;
+        if AA == 1
+            ROW = 'A';
+        elseif AA == 2
+            ROW = 'D'
+        elseif AA = 3
+            ROW = 'G'
+        elseif AA == 4
+            ROW = 'J'
+        elseif AA == 5
+            ROW = 'M'
+        elseif AA == 6
+            ROW = 'P'
+        elseif AA == 7
+            ROW = 'S'
+        end
+        filename = 'ErrorAnalysis.xlsx';
+        writetocell = strcat(ROW,num2str(BB));
+        xlswrite(filename, export_info, 'Equation_3',  writetocell);  
     end
 
 end
